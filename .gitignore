@@ -25,4 +25,4 @@ clients/
 # CONTRIBUTING.md all link it, so it has to be in the repo the links are in.
 /BUGS.md
 /MISMATCHES.md
-/SHORTCUTS.md
+/SHORTCUTS.md/build/
