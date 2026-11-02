@@ -4,6 +4,8 @@
 #include <wx/srchctrl.h>
 #include <wx/aboutdlg.h>
 #include <wx/msgdlg.h>
+#include <wx/checkbox.h>
+#include <wx/listctrl.h>
 
 namespace monx {
 
@@ -103,7 +105,7 @@ void MainWindow::init_ui() {
     // Center Pane: Monster Editor (Tabbed)
     m_editor_tabs = new wxNotebook(this, wxID_ANY);
 
-    // Identity Tab
+    // 1. Identity Tab
     wxPanel* identity_tab = new wxPanel(m_editor_tabs, wxID_ANY);
     wxFlexGridSizer* id_sizer = new wxFlexGridSizer(2, 5, 10);
     id_sizer->AddGrowableCol(1, 1);
@@ -135,7 +137,7 @@ void MainWindow::init_ui() {
     identity_tab->SetSizer(id_sizer);
     m_editor_tabs->AddPage(identity_tab, "Identity");
 
-    // Look Tab
+    // 2. Look Tab
     wxPanel* look_tab = new wxPanel(m_editor_tabs, wxID_ANY);
     wxFlexGridSizer* look_sizer = new wxFlexGridSizer(2, 5, 10);
     look_sizer->AddGrowableCol(1, 1);
@@ -151,11 +153,75 @@ void MainWindow::init_ui() {
     look_tab->SetSizer(look_sizer);
     m_editor_tabs->AddPage(look_tab, "Look & Outfit");
 
-    // Other Tabs (Combat, Loot, Spells)
-    m_editor_tabs->AddPage(new wxPanel(m_editor_tabs, wxID_ANY), "Combat");
-    m_editor_tabs->AddPage(new wxPanel(m_editor_tabs, wxID_ANY), "Loot");
-    m_editor_tabs->AddPage(new wxPanel(m_editor_tabs, wxID_ANY), "Spells");
-    m_editor_tabs->AddPage(new wxPanel(m_editor_tabs, wxID_ANY), "Voices");
+    // 3. Combat Tab
+    wxPanel* combat_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxFlexGridSizer* combat_sizer = new wxFlexGridSizer(2, 5, 10);
+    combat_sizer->AddGrowableCol(1, 1);
+
+    combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Target Distance:"), 0, wxALIGN_CENTER_VERTICAL);
+    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "1", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10), 1, wxEXPAND);
+
+    combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Static Attack %:"), 0, wxALIGN_CENTER_VERTICAL);
+    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "70", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100), 1, wxEXPAND);
+
+    combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Run on Health:"), 0, wxALIGN_CENTER_VERTICAL);
+    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000), 1, wxEXPAND);
+
+    combat_tab->SetSizer(combat_sizer);
+    m_editor_tabs->AddPage(combat_tab, "Combat");
+
+    // 4. Loot Tab
+    wxPanel* loot_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxBoxSizer* loot_sizer = new wxBoxSizer(wxVERTICAL);
+    wxListView* loot_list = new wxListView(loot_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    loot_list->InsertColumn(0, "Item ID", wxLIST_FORMAT_LEFT, 80);
+    loot_list->InsertColumn(1, "Name", wxLIST_FORMAT_LEFT, 150);
+    loot_list->InsertColumn(2, "Count Max", wxLIST_FORMAT_RIGHT, 80);
+    loot_list->InsertColumn(3, "Chance (ppm)", wxLIST_FORMAT_RIGHT, 100);
+    loot_sizer->Add(loot_list, 1, wxEXPAND | wxALL, 5);
+
+    wxBoxSizer* loot_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
+    loot_btn_sizer->Add(new wxButton(loot_tab, wxID_ANY, "Add Drop"), 0, wxRIGHT, 5);
+    loot_btn_sizer->Add(new wxButton(loot_tab, wxID_ANY, "Remove Drop"), 0);
+    loot_sizer->Add(loot_btn_sizer, 0, wxALL, 5);
+
+    loot_tab->SetSizer(loot_sizer);
+    m_editor_tabs->AddPage(loot_tab, "Loot");
+
+    // 5. Spells Tab
+    wxPanel* spells_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxBoxSizer* spells_sizer = new wxBoxSizer(wxVERTICAL);
+    wxListView* spells_list = new wxListView(spells_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    spells_list->InsertColumn(0, "Spell Name", wxLIST_FORMAT_LEFT, 160);
+    spells_list->InsertColumn(1, "Interval (ms)", wxLIST_FORMAT_RIGHT, 100);
+    spells_list->InsertColumn(2, "Chance %", wxLIST_FORMAT_RIGHT, 80);
+    spells_list->InsertColumn(3, "Min / Max", wxLIST_FORMAT_LEFT, 120);
+    spells_sizer->Add(spells_list, 1, wxEXPAND | wxALL, 5);
+
+    wxBoxSizer* spell_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
+    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Add Attack"), 0, wxRIGHT, 5);
+    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Add Defense"), 0, wxRIGHT, 5);
+    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Remove Spell"), 0);
+    spells_sizer->Add(spell_btn_sizer, 0, wxALL, 5);
+
+    spells_tab->SetSizer(spells_sizer);
+    m_editor_tabs->AddPage(spells_tab, "Spells");
+
+    // 6. Voices Tab
+    wxPanel* voices_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxBoxSizer* voices_sizer = new wxBoxSizer(wxVERTICAL);
+    wxListView* voices_list = new wxListView(voices_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    voices_list->InsertColumn(0, "Sentence", wxLIST_FORMAT_LEFT, 350);
+    voices_list->InsertColumn(1, "Yell", wxLIST_FORMAT_CENTER, 60);
+    voices_sizer->Add(voices_list, 1, wxEXPAND | wxALL, 5);
+
+    wxBoxSizer* voice_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
+    voice_btn_sizer->Add(new wxButton(voices_tab, wxID_ANY, "Add Voice"), 0, wxRIGHT, 5);
+    voice_btn_sizer->Add(new wxButton(voices_tab, wxID_ANY, "Remove Voice"), 0);
+    voices_sizer->Add(voice_btn_sizer, 0, wxALL, 5);
+
+    voices_tab->SetSizer(voices_sizer);
+    m_editor_tabs->AddPage(voices_tab, "Voices");
 
     m_mgr.AddPane(m_editor_tabs, wxAuiPaneInfo().CenterPane());
 

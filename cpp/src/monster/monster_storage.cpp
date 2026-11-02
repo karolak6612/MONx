@@ -1,4 +1,5 @@
 #include "monx/monster_storage.h"
+#include "monx/lua_monster_parser.h"
 #include <pugixml.hpp>
 #include <fstream>
 #include <sstream>
@@ -201,30 +202,13 @@ bool MonsterStorage::read_lua(const std::string& path, MonsterDoc& out_doc, cons
     if (!f) return false;
     std::stringstream ss;
     ss << f.rdbuf();
-    out_doc.raw_content = ss.str();
-
-    // Basic extraction for name and health
-    std::string line;
-    std::istringstream stream(out_doc.raw_content);
-    while (std::getline(stream, line)) {
-        if (line.find("mType:name(") != std::string::npos || line.find(".name =") != std::string::npos) {
-            auto q1 = line.find('"');
-            auto q2 = line.rfind('"');
-            if (q1 != std::string::npos && q2 != std::string::npos && q2 > q1) {
-                out_doc.name = line.substr(q1 + 1, q2 - q1 - 1);
-            }
-        }
-        if (line.find("mType:experience(") != std::string::npos || line.find(".experience =") != std::string::npos) {
-            // parse number
-        }
-    }
-    return true;
+    return LuaMonsterParser::parse(ss.str(), out_doc);
 }
 
 bool MonsterStorage::write_lua(const std::string& path, const MonsterDoc& doc, const EngineProfile& profile) {
     std::ofstream f(path);
     if (!f) return false;
-    f << doc.raw_content;
+    f << LuaMonsterParser::serialize(doc);
     return true;
 }
 

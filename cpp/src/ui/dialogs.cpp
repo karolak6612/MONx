@@ -1,4 +1,6 @@
 #include "monx/dialogs.h"
+#include "monx/loot_simulator.h"
+#include "monx/workspace.h"
 
 namespace monx {
 
@@ -63,18 +65,42 @@ CompareDialog::CompareDialog(wxWindow* parent)
 
 // --- Loot Simulator Dialog ---
 LootSimDialog::LootSimDialog(wxWindow* parent)
-    : wxDialog(parent, wxID_ANY, "Loot Simulator", wxDefaultPosition, wxSize(500, 400)) {
+    : wxDialog(parent, wxID_ANY, "Loot Simulator", wxDefaultPosition, wxSize(600, 450)) {
     wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
-    sizer->Add(new wxStaticText(this, wxID_ANY, "Simulate Monster Kills:"), 0, wxALL, 10);
+    sizer->Add(new wxStaticText(this, wxID_ANY, "Monte Carlo Loot Simulator"), 0, wxALL, 10);
 
+    wxBoxSizer* opt_sizer = new wxBoxSizer(wxHORIZONTAL);
+    opt_sizer->Add(new wxStaticText(this, wxID_ANY, "Kills:"), 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, 5);
     wxSpinCtrl* kills_ctrl = new wxSpinCtrl(this, wxID_ANY, "1000", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 1000000);
-    sizer->Add(kills_ctrl, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    opt_sizer->Add(kills_ctrl, 0, wxRIGHT, 15);
 
-    wxButton* sim_btn = new wxButton(this, wxID_ANY, "Roll Loot Table");
-    sizer->Add(sim_btn, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
+    wxButton* sim_btn = new wxButton(this, wxID_ANY, "Simulate Drops");
+    opt_sizer->Add(sim_btn, 0);
+    sizer->Add(opt_sizer, 0, wxLEFT | wxRIGHT | wxBOTTOM, 10);
 
-    wxTextCtrl* results = new wxTextCtrl(this, wxID_ANY, "Simulation Results:\n- Gold Coins: 18,420 (Avg: 18.4 / kill)\n- Rare Drops: 4", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
+    wxTextCtrl* results = new wxTextCtrl(this, wxID_ANY, "Click 'Simulate Drops' to run simulation.", wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY);
     sizer->Add(results, 1, wxEXPAND | wxALL, 10);
+
+    sim_btn->Bind(wxEVT_BUTTON, [this, kills_ctrl, results](wxCommandEvent&) {
+        LootSimParams params;
+        params.kills_per_session = kills_ctrl->GetValue();
+
+        // Get currently active monster loot or sample loot
+        std::vector<LootItem> sample_loot = {
+            {.id = 2148, .countmax = 50, .chance = 70000, .comment = "gold coin"},
+            {.id = 2152, .countmax = 2, .chance = 15000, .comment = "platinum coin"},
+            {.id = 2498, .countmax = 1, .chance = 500, .comment = "royal helmet"}
+        };
+
+        auto res = LootSimulator::run(sample_loot, params);
+        wxString report = wxString::Format("Simulated %u kills:\n\n", res.total_kills);
+        for (const auto& it : res.items) {
+            report += wxString::Format("- %s (ID %u): Total %u dropped (seen in %u kills, %.2f%% drop rate)\n",
+                it.name, it.id, it.total_dropped, it.kills_with_drop,
+                (double)it.kills_with_drop / (double)res.total_kills * 100.0);
+        }
+        results->SetValue(report);
+    });
 
     sizer->Add(CreateButtonSizer(wxOK), 0, wxEXPAND | wxALL, 10);
     SetSizer(sizer);

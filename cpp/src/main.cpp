@@ -12,7 +12,10 @@ public:
 
         // Auto-open fixture workspace if available
         WorkspacePaths paths;
-        paths.monsters = "src-tauri/fixtures/engines/tfs/monster";
+        paths.monsters = "../src-tauri/fixtures/engines/tfs/monster";
+        if (!wxDirExists(paths.monsters)) {
+            paths.monsters = "src-tauri/fixtures/engines/tfs/monster";
+        }
         win->load_workspace(paths, "tfs");
 
         return true;

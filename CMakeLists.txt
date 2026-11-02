@@ -43,6 +43,7 @@ add_executable(monx_probe
     cpp/src/probe_main.cpp
     cpp/src/engine/engine_profile.cpp
     cpp/src/monster/monster_storage.cpp
+    cpp/src/monster/lua_monster_parser.cpp
     cpp/src/formats/formats_manager.cpp
     cpp/src/workspace.cpp
 )
