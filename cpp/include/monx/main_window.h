@@ -26,6 +26,7 @@ private:
     void init_ui();
 
     // Event handlers
+    void on_new_monster(wxCommandEvent& evt);
     void on_open_workspace(wxCommandEvent& evt);
     void on_save_monster(wxCommandEvent& evt);
     void on_quit(wxCommandEvent& evt);

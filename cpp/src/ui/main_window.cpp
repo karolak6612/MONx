@@ -10,7 +10,8 @@
 namespace monx {
 
 enum {
-    ID_OPEN_WORKSPACE = wxID_HIGHEST + 1,
+    ID_NEW_MONSTER = wxID_HIGHEST + 1,
+    ID_OPEN_WORKSPACE,
     ID_SAVE_MONSTER,
     ID_BATCH_EDIT,
     ID_COMPARE,
@@ -50,6 +51,7 @@ void MainWindow::init_menu() {
 
     // File
     wxMenu* file_menu = new wxMenu();
+    file_menu->Append(ID_NEW_MONSTER, "&New Monster...\tCtrl+N");
     file_menu->Append(ID_OPEN_WORKSPACE, "&Open Workspace...\tCtrl+O");
     file_menu->Append(ID_SAVE_MONSTER, "&Save Monster\tCtrl+S");
     file_menu->AppendSeparator();
@@ -77,6 +79,7 @@ void MainWindow::init_menu() {
 
     SetMenuBar(mb);
 
+    Bind(wxEVT_MENU, &MainWindow::on_new_monster, this, ID_NEW_MONSTER);
     Bind(wxEVT_MENU, &MainWindow::on_open_workspace, this, ID_OPEN_WORKSPACE);
     Bind(wxEVT_MENU, &MainWindow::on_save_monster, this, ID_SAVE_MONSTER);
     Bind(wxEVT_MENU, &MainWindow::on_quit, this, wxID_EXIT);
@@ -317,6 +320,30 @@ void MainWindow::init_ui() {
 
     voices_tab->SetSizer(voices_sizer);
     m_editor_tabs->AddPage(voices_tab, "Voices");
+
+    // 8. Bestiary Tab
+    wxPanel* bestiary_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxFlexGridSizer* bestiary_sizer = new wxFlexGridSizer(2, 5, 10);
+    bestiary_sizer->AddGrowableCol(1, 1);
+    bestiary_sizer->Add(new wxStaticText(bestiary_tab, wxID_ANY, "Bestiary Class:"), 0, wxALIGN_CENTER_VERTICAL);
+    bestiary_sizer->Add(new wxTextCtrl(bestiary_tab, wxID_ANY, "Amphibic"), 1, wxEXPAND);
+    bestiary_sizer->Add(new wxStaticText(bestiary_tab, wxID_ANY, "Difficulty:"), 0, wxALIGN_CENTER_VERTICAL);
+    bestiary_sizer->Add(new wxTextCtrl(bestiary_tab, wxID_ANY, "Easy"), 1, wxEXPAND);
+    bestiary_sizer->Add(new wxStaticText(bestiary_tab, wxID_ANY, "Occurrence:"), 0, wxALIGN_CENTER_VERTICAL);
+    bestiary_sizer->Add(new wxTextCtrl(bestiary_tab, wxID_ANY, "Common"), 1, wxEXPAND);
+    bestiary_tab->SetSizer(bestiary_sizer);
+    m_editor_tabs->AddPage(bestiary_tab, "Bestiary");
+
+    // 9. Target Strategy Tab
+    wxPanel* target_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxFlexGridSizer* target_sizer = new wxFlexGridSizer(2, 5, 10);
+    target_sizer->AddGrowableCol(1, 1);
+    target_sizer->Add(new wxStaticText(target_tab, wxID_ANY, "Nearest Target %:"), 0, wxALIGN_CENTER_VERTICAL);
+    target_sizer->Add(new wxSpinCtrl(target_tab, wxID_ANY, "100", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100), 1, wxEXPAND);
+    target_sizer->Add(new wxStaticText(target_tab, wxID_ANY, "Lowest Health %:"), 0, wxALIGN_CENTER_VERTICAL);
+    target_sizer->Add(new wxSpinCtrl(target_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100), 1, wxEXPAND);
+    target_tab->SetSizer(target_sizer);
+    m_editor_tabs->AddPage(target_tab, "Target Strategy");
 
     m_mgr.AddPane(m_editor_tabs, wxAuiPaneInfo().CenterPane());
 
@@ -610,6 +637,21 @@ void MainWindow::on_remove_voice(wxCommandEvent&) {
     if (sel >= 0 && sel < (long)m_current_doc.voices.size()) {
         m_current_doc.voices.erase(m_current_doc.voices.begin() + sel);
         select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_new_monster(wxCommandEvent&) {
+    CreateWizard wiz(this);
+    if (wiz.ShowModal() == wxID_OK) {
+        MonsterDoc new_doc;
+        new_doc.name = wiz.get_name();
+        new_doc.file = wiz.get_file();
+        new_doc.health_max = 100;
+        new_doc.health_now = 100;
+        new_doc.speed = 200;
+        Workspace::instance().save_monster(new_doc);
+        load_workspace(Workspace::instance().paths(), Workspace::instance().profile().key);
+        select_monster(new_doc.file);
     }
 }
 
