@@ -1,5 +1,6 @@
 #include "monx/monster_storage.h"
 #include "monx/lua_monster_parser.h"
+#include "monx/full_linter.h"
 #include <pugixml.hpp>
 #include <fstream>
 #include <sstream>
@@ -325,21 +326,7 @@ bool MonsterStorage::write_lua(const std::string& path, const MonsterDoc& doc, c
 }
 
 std::vector<Lint> MonsterStorage::lint(const MonsterDoc& doc, const EngineProfile& profile) {
-    std::vector<Lint> lints;
-
-    if (doc.name.empty()) {
-        lints.push_back({doc.file, "name.empty", "error", "Monster name cannot be empty", "name"});
-    }
-    if (doc.health_max == 0) {
-        lints.push_back({doc.file, "health.zero", "error", "Max health must be greater than zero", "health"});
-    }
-    if (doc.health_now > doc.health_max) {
-        lints.push_back({doc.file, "health.now-exceeds-max", "warning", "Initial health exceeds max health", "health"});
-    }
-    if (doc.look.mode == "type" && !doc.look.type.has_value()) {
-        lints.push_back({doc.file, "look.missing-type", "warning", "Look has no type specified", "look"});
-    }
-    return lints;
+    return FullLinter::run(doc, profile);
 }
 
 } // namespace monx

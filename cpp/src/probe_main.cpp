@@ -15,7 +15,11 @@ int main(int argc, char* argv[]) {
 
     // 2. Round-trip XML parsing test
     monx::MonsterDoc doc;
-    bool ok = monx::MonsterStorage::read_xml("src-tauri/fixtures/engines/tfs/monster/probe hound.xml", doc, tfs);
+    std::string fixture_path = "fixtures/engines/tfs/monster/probe hound.xml";
+    if (!std::filesystem::exists(fixture_path)) {
+        fixture_path = "../fixtures/engines/tfs/monster/probe hound.xml";
+    }
+    bool ok = monx::MonsterStorage::read_xml(fixture_path, doc, tfs);
     assert(ok);
     assert(doc.name == "Probe Hound");
     assert(doc.health_max == 180);
@@ -51,7 +55,10 @@ int main(int argc, char* argv[]) {
 
     // 5. Workspace open & index test
     monx::WorkspacePaths paths;
-    paths.monsters = "src-tauri/fixtures/engines/tfs/monster";
+    paths.monsters = "fixtures/engines/tfs/monster";
+    if (!std::filesystem::exists(paths.monsters)) {
+        paths.monsters = "../fixtures/engines/tfs/monster";
+    }
     bool ws_ok = monx::Workspace::instance().open(paths, "tfs");
     assert(ws_ok);
     assert(monx::Workspace::instance().monsters().size() >= 2);
