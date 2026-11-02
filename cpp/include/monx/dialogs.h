@@ -2,6 +2,7 @@
 
 #include <wx/wx.h>
 #include <wx/spinctrl.h>
+#include "monx/monster_model.h"
 
 namespace monx {
 
@@ -27,7 +28,17 @@ public:
 
 class LootSimDialog : public wxDialog {
 public:
-    LootSimDialog(wxWindow* parent);
+    LootSimDialog(wxWindow* parent, const std::vector<LootItem>& loot = {});
+};
+
+class PreferencesDialog : public wxDialog {
+public:
+    PreferencesDialog(wxWindow* parent);
+};
+
+class HotkeysDialog : public wxDialog {
+public:
+    HotkeysDialog(wxWindow* parent);
 };
 
 class CreateWizard : public wxDialog {

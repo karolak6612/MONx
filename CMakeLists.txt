@@ -45,6 +45,9 @@ add_executable(monx_probe
     cpp/src/monster/monster_storage.cpp
     cpp/src/monster/lua_monster_parser.cpp
     cpp/src/formats/formats_manager.cpp
+    cpp/src/formats/spr_reader.cpp
+    cpp/src/formats/dat_reader.cpp
+    cpp/src/formats/otb_reader.cpp
     cpp/src/workspace.cpp
 )
 target_link_libraries(monx_probe PRIVATE

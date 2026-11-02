@@ -4,8 +4,8 @@
 #include <wx/srchctrl.h>
 #include <wx/aboutdlg.h>
 #include <wx/msgdlg.h>
-#include <wx/checkbox.h>
-#include <wx/listctrl.h>
+#include <wx/numdlg.h>
+#include <wx/textdlg.h>
 
 namespace monx {
 
@@ -19,7 +19,14 @@ enum {
     ID_PREFERENCES,
     ID_HOTKEYS,
     ID_MONSTER_LIST,
-    ID_SEARCH_CTRL
+    ID_SEARCH_CTRL,
+    ID_ADD_LOOT,
+    ID_REMOVE_LOOT,
+    ID_ADD_ATTACK,
+    ID_ADD_DEFENSE,
+    ID_REMOVE_SPELL,
+    ID_ADD_VOICE,
+    ID_REMOVE_VOICE
 };
 
 MainWindow::MainWindow()
@@ -134,6 +141,10 @@ void MainWindow::init_ui() {
     m_speed_ctrl = new wxSpinCtrl(identity_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999);
     id_sizer->Add(m_speed_ctrl, 1, wxEXPAND);
 
+    id_sizer->Add(new wxStaticText(identity_tab, wxID_ANY, "Mana Cost:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_manacost_ctrl = new wxSpinCtrl(identity_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 99999);
+    id_sizer->Add(m_manacost_ctrl, 1, wxEXPAND);
+
     identity_tab->SetSizer(id_sizer);
     m_editor_tabs->AddPage(identity_tab, "Identity");
 
@@ -145,6 +156,26 @@ void MainWindow::init_ui() {
     look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Look Type / ID:"), 0, wxALIGN_CENTER_VERTICAL);
     m_look_type_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 999999);
     look_sizer->Add(m_look_type_ctrl, 1, wxEXPAND);
+
+    look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Head:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_look_head_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 132);
+    look_sizer->Add(m_look_head_ctrl, 1, wxEXPAND);
+
+    look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Body:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_look_body_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 132);
+    look_sizer->Add(m_look_body_ctrl, 1, wxEXPAND);
+
+    look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Legs:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_look_legs_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 132);
+    look_sizer->Add(m_look_legs_ctrl, 1, wxEXPAND);
+
+    look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Feet:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_look_feet_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 132);
+    look_sizer->Add(m_look_feet_ctrl, 1, wxEXPAND);
+
+    look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Addons:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_look_addons_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 3);
+    look_sizer->Add(m_look_addons_ctrl, 1, wxEXPAND);
 
     look_sizer->Add(new wxStaticText(look_tab, wxID_ANY, "Corpse ID:"), 0, wxALIGN_CENTER_VERTICAL);
     m_look_corpse_ctrl = new wxSpinCtrl(look_tab, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 999999);
@@ -158,67 +189,131 @@ void MainWindow::init_ui() {
     wxFlexGridSizer* combat_sizer = new wxFlexGridSizer(2, 5, 10);
     combat_sizer->AddGrowableCol(1, 1);
 
+    combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Armor:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_armor_ctrl = new wxSpinCtrl(combat_tab, wxID_ANY, "10", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999);
+    combat_sizer->Add(m_armor_ctrl, 1, wxEXPAND);
+
+    combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Defense:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_defense_ctrl = new wxSpinCtrl(combat_tab, wxID_ANY, "10", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 9999);
+    combat_sizer->Add(m_defense_ctrl, 1, wxEXPAND);
+
     combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Target Distance:"), 0, wxALIGN_CENTER_VERTICAL);
-    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "1", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10), 1, wxEXPAND);
+    m_target_distance_ctrl = new wxSpinCtrl(combat_tab, wxID_ANY, "1", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 10);
+    combat_sizer->Add(m_target_distance_ctrl, 1, wxEXPAND);
 
     combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Static Attack %:"), 0, wxALIGN_CENTER_VERTICAL);
-    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "70", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100), 1, wxEXPAND);
+    m_static_attack_ctrl = new wxSpinCtrl(combat_tab, wxID_ANY, "70", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 100);
+    combat_sizer->Add(m_static_attack_ctrl, 1, wxEXPAND);
 
     combat_sizer->Add(new wxStaticText(combat_tab, wxID_ANY, "Run on Health:"), 0, wxALIGN_CENTER_VERTICAL);
-    combat_sizer->Add(new wxSpinCtrl(combat_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000), 1, wxEXPAND);
+    m_run_on_health_ctrl = new wxSpinCtrl(combat_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 0, 10000);
+    combat_sizer->Add(m_run_on_health_ctrl, 1, wxEXPAND);
 
     combat_tab->SetSizer(combat_sizer);
     m_editor_tabs->AddPage(combat_tab, "Combat");
 
-    // 4. Loot Tab
+    // 4. Resistances Tab
+    wxPanel* res_tab = new wxPanel(m_editor_tabs, wxID_ANY);
+    wxFlexGridSizer* res_sizer = new wxFlexGridSizer(2, 5, 10);
+    res_sizer->AddGrowableCol(1, 1);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Physical %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_physical_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_physical_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Fire %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_fire_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_fire_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Earth %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_earth_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_earth_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Energy %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_energy_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_energy_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Ice %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_ice_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_ice_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Holy %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_holy_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_holy_ctrl, 1, wxEXPAND);
+
+    res_sizer->Add(new wxStaticText(res_tab, wxID_ANY, "Death %:"), 0, wxALIGN_CENTER_VERTICAL);
+    m_res_death_ctrl = new wxSpinCtrl(res_tab, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, -100, 100);
+    res_sizer->Add(m_res_death_ctrl, 1, wxEXPAND);
+
+    res_tab->SetSizer(res_sizer);
+    m_editor_tabs->AddPage(res_tab, "Resistances");
+
+    // 5. Loot Tab
     wxPanel* loot_tab = new wxPanel(m_editor_tabs, wxID_ANY);
     wxBoxSizer* loot_sizer = new wxBoxSizer(wxVERTICAL);
-    wxListView* loot_list = new wxListView(loot_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-    loot_list->InsertColumn(0, "Item ID", wxLIST_FORMAT_LEFT, 80);
-    loot_list->InsertColumn(1, "Name", wxLIST_FORMAT_LEFT, 150);
-    loot_list->InsertColumn(2, "Count Max", wxLIST_FORMAT_RIGHT, 80);
-    loot_list->InsertColumn(3, "Chance (ppm)", wxLIST_FORMAT_RIGHT, 100);
-    loot_sizer->Add(loot_list, 1, wxEXPAND | wxALL, 5);
+    m_loot_list = new wxListView(loot_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    m_loot_list->InsertColumn(0, "Item ID", wxLIST_FORMAT_LEFT, 80);
+    m_loot_list->InsertColumn(1, "Name", wxLIST_FORMAT_LEFT, 150);
+    m_loot_list->InsertColumn(2, "Count Max", wxLIST_FORMAT_RIGHT, 80);
+    m_loot_list->InsertColumn(3, "Chance (ppm)", wxLIST_FORMAT_RIGHT, 100);
+    loot_sizer->Add(m_loot_list, 1, wxEXPAND | wxALL, 5);
 
     wxBoxSizer* loot_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
-    loot_btn_sizer->Add(new wxButton(loot_tab, wxID_ANY, "Add Drop"), 0, wxRIGHT, 5);
-    loot_btn_sizer->Add(new wxButton(loot_tab, wxID_ANY, "Remove Drop"), 0);
+    wxButton* add_loot_btn = new wxButton(loot_tab, ID_ADD_LOOT, "Add Drop");
+    wxButton* rem_loot_btn = new wxButton(loot_tab, ID_REMOVE_LOOT, "Remove Drop");
+    loot_btn_sizer->Add(add_loot_btn, 0, wxRIGHT, 5);
+    loot_btn_sizer->Add(rem_loot_btn, 0);
     loot_sizer->Add(loot_btn_sizer, 0, wxALL, 5);
+
+    add_loot_btn->Bind(wxEVT_BUTTON, &MainWindow::on_add_loot, this);
+    rem_loot_btn->Bind(wxEVT_BUTTON, &MainWindow::on_remove_loot, this);
 
     loot_tab->SetSizer(loot_sizer);
     m_editor_tabs->AddPage(loot_tab, "Loot");
 
-    // 5. Spells Tab
+    // 6. Spells Tab
     wxPanel* spells_tab = new wxPanel(m_editor_tabs, wxID_ANY);
     wxBoxSizer* spells_sizer = new wxBoxSizer(wxVERTICAL);
-    wxListView* spells_list = new wxListView(spells_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-    spells_list->InsertColumn(0, "Spell Name", wxLIST_FORMAT_LEFT, 160);
-    spells_list->InsertColumn(1, "Interval (ms)", wxLIST_FORMAT_RIGHT, 100);
-    spells_list->InsertColumn(2, "Chance %", wxLIST_FORMAT_RIGHT, 80);
-    spells_list->InsertColumn(3, "Min / Max", wxLIST_FORMAT_LEFT, 120);
-    spells_sizer->Add(spells_list, 1, wxEXPAND | wxALL, 5);
+    m_spells_list = new wxListView(spells_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    m_spells_list->InsertColumn(0, "Spell Name", wxLIST_FORMAT_LEFT, 160);
+    m_spells_list->InsertColumn(1, "Interval (ms)", wxLIST_FORMAT_RIGHT, 100);
+    m_spells_list->InsertColumn(2, "Chance %", wxLIST_FORMAT_RIGHT, 80);
+    m_spells_list->InsertColumn(3, "Min / Max", wxLIST_FORMAT_LEFT, 120);
+    spells_sizer->Add(m_spells_list, 1, wxEXPAND | wxALL, 5);
 
     wxBoxSizer* spell_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
-    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Add Attack"), 0, wxRIGHT, 5);
-    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Add Defense"), 0, wxRIGHT, 5);
-    spell_btn_sizer->Add(new wxButton(spells_tab, wxID_ANY, "Remove Spell"), 0);
+    wxButton* add_atk_btn = new wxButton(spells_tab, ID_ADD_ATTACK, "Add Attack");
+    wxButton* add_def_btn = new wxButton(spells_tab, ID_ADD_DEFENSE, "Add Defense");
+    wxButton* rem_spell_btn = new wxButton(spells_tab, ID_REMOVE_SPELL, "Remove Spell");
+    spell_btn_sizer->Add(add_atk_btn, 0, wxRIGHT, 5);
+    spell_btn_sizer->Add(add_def_btn, 0, wxRIGHT, 5);
+    spell_btn_sizer->Add(rem_spell_btn, 0);
     spells_sizer->Add(spell_btn_sizer, 0, wxALL, 5);
+
+    add_atk_btn->Bind(wxEVT_BUTTON, &MainWindow::on_add_attack, this);
+    add_def_btn->Bind(wxEVT_BUTTON, &MainWindow::on_add_defense, this);
+    rem_spell_btn->Bind(wxEVT_BUTTON, &MainWindow::on_remove_spell, this);
 
     spells_tab->SetSizer(spells_sizer);
     m_editor_tabs->AddPage(spells_tab, "Spells");
 
-    // 6. Voices Tab
+    // 7. Voices Tab
     wxPanel* voices_tab = new wxPanel(m_editor_tabs, wxID_ANY);
     wxBoxSizer* voices_sizer = new wxBoxSizer(wxVERTICAL);
-    wxListView* voices_list = new wxListView(voices_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
-    voices_list->InsertColumn(0, "Sentence", wxLIST_FORMAT_LEFT, 350);
-    voices_list->InsertColumn(1, "Yell", wxLIST_FORMAT_CENTER, 60);
-    voices_sizer->Add(voices_list, 1, wxEXPAND | wxALL, 5);
+    m_voices_list = new wxListView(voices_tab, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxLC_REPORT);
+    m_voices_list->InsertColumn(0, "Sentence", wxLIST_FORMAT_LEFT, 350);
+    m_voices_list->InsertColumn(1, "Yell", wxLIST_FORMAT_CENTER, 60);
+    voices_sizer->Add(m_voices_list, 1, wxEXPAND | wxALL, 5);
 
     wxBoxSizer* voice_btn_sizer = new wxBoxSizer(wxHORIZONTAL);
-    voice_btn_sizer->Add(new wxButton(voices_tab, wxID_ANY, "Add Voice"), 0, wxRIGHT, 5);
-    voice_btn_sizer->Add(new wxButton(voices_tab, wxID_ANY, "Remove Voice"), 0);
+    wxButton* add_voice_btn = new wxButton(voices_tab, ID_ADD_VOICE, "Add Voice");
+    wxButton* rem_voice_btn = new wxButton(voices_tab, ID_REMOVE_VOICE, "Remove Voice");
+    voice_btn_sizer->Add(add_voice_btn, 0, wxRIGHT, 5);
+    voice_btn_sizer->Add(rem_voice_btn, 0);
     voices_sizer->Add(voice_btn_sizer, 0, wxALL, 5);
+
+    add_voice_btn->Bind(wxEVT_BUTTON, &MainWindow::on_add_voice, this);
+    rem_voice_btn->Bind(wxEVT_BUTTON, &MainWindow::on_remove_voice, this);
 
     voices_tab->SetSizer(voices_sizer);
     m_editor_tabs->AddPage(voices_tab, "Voices");
@@ -301,16 +396,73 @@ void MainWindow::select_monster(const std::string& file) {
     m_current_file = file;
     m_current_doc = *doc_opt;
 
+    // 1. Identity
     m_name_ctrl->SetValue(m_current_doc.name);
     m_desc_ctrl->SetValue(m_current_doc.name_description);
     m_raceid_ctrl->SetValue(m_current_doc.raceid);
     m_health_ctrl->SetValue(m_current_doc.health_max);
     m_exp_ctrl->SetValue(m_current_doc.experience);
     m_speed_ctrl->SetValue(m_current_doc.speed);
+    m_manacost_ctrl->SetValue(m_current_doc.manacost);
 
+    // 2. Look
     uint32_t look_id = (m_current_doc.look.mode == "typeex") ? m_current_doc.look.typeex.value_or(0) : m_current_doc.look.type.value_or(0);
     m_look_type_ctrl->SetValue(look_id);
+    m_look_head_ctrl->SetValue(m_current_doc.look.head);
+    m_look_body_ctrl->SetValue(m_current_doc.look.body);
+    m_look_legs_ctrl->SetValue(m_current_doc.look.legs);
+    m_look_feet_ctrl->SetValue(m_current_doc.look.feet);
+    m_look_addons_ctrl->SetValue(m_current_doc.look.addons);
     m_look_corpse_ctrl->SetValue(m_current_doc.look.corpse);
+
+    // 3. Combat
+    m_target_distance_ctrl->SetValue(std::max(1u, (uint32_t)std::stoul(m_current_doc.flags.count("targetdistance") ? m_current_doc.flags["targetdistance"] : "1")));
+    m_static_attack_ctrl->SetValue((uint32_t)std::stoul(m_current_doc.flags.count("staticattack") ? m_current_doc.flags["staticattack"] : "70"));
+    m_run_on_health_ctrl->SetValue((uint32_t)std::stoul(m_current_doc.flags.count("runonhealth") ? m_current_doc.flags["runonhealth"] : "0"));
+
+    // 4. Resistances
+    m_res_physical_ctrl->SetValue(m_current_doc.elements.count("physical") ? m_current_doc.elements["physical"] : 0);
+    m_res_fire_ctrl->SetValue(m_current_doc.elements.count("fire") ? m_current_doc.elements["fire"] : 0);
+    m_res_earth_ctrl->SetValue(m_current_doc.elements.count("earth") ? m_current_doc.elements["earth"] : 0);
+    m_res_energy_ctrl->SetValue(m_current_doc.elements.count("energy") ? m_current_doc.elements["energy"] : 0);
+    m_res_ice_ctrl->SetValue(m_current_doc.elements.count("ice") ? m_current_doc.elements["ice"] : 0);
+    m_res_holy_ctrl->SetValue(m_current_doc.elements.count("holy") ? m_current_doc.elements["holy"] : 0);
+    m_res_death_ctrl->SetValue(m_current_doc.elements.count("death") ? m_current_doc.elements["death"] : 0);
+
+    // 5. Populate Loot
+    m_loot_list->DeleteAllItems();
+    for (size_t i = 0; i < m_current_doc.loot.size(); ++i) {
+        const auto& item = m_current_doc.loot[i];
+        long idx = m_loot_list->InsertItem(i, wxString::Format("%u", item.id));
+        std::string iname = item.comment.empty() ? ("Item #" + std::to_string(item.id)) : item.comment;
+        m_loot_list->SetItem(idx, 1, iname);
+        m_loot_list->SetItem(idx, 2, wxString::Format("%u", item.countmax));
+        m_loot_list->SetItem(idx, 3, wxString::Format("%u", item.chance));
+    }
+
+    // 6. Populate Spells
+    m_spells_list->DeleteAllItems();
+    size_t sidx = 0;
+    for (const auto& sp : m_current_doc.attacks) {
+        long idx = m_spells_list->InsertItem(sidx++, "[Atk] " + sp.name);
+        m_spells_list->SetItem(idx, 1, wxString::Format("%u", sp.interval));
+        m_spells_list->SetItem(idx, 2, wxString::Format("%u", sp.chance));
+        m_spells_list->SetItem(idx, 3, wxString::Format("%d / %d", sp.min.value_or(0), sp.max.value_or(0)));
+    }
+    for (const auto& sp : m_current_doc.defenses) {
+        long idx = m_spells_list->InsertItem(sidx++, "[Def] " + sp.name);
+        m_spells_list->SetItem(idx, 1, wxString::Format("%u", sp.interval));
+        m_spells_list->SetItem(idx, 2, wxString::Format("%u", sp.chance));
+        m_spells_list->SetItem(idx, 3, wxString::Format("%d / %d", sp.min.value_or(0), sp.max.value_or(0)));
+    }
+
+    // 7. Populate Voices
+    m_voices_list->DeleteAllItems();
+    for (size_t i = 0; i < m_current_doc.voices.size(); ++i) {
+        const auto& v = m_current_doc.voices[i];
+        long idx = m_voices_list->InsertItem(i, v.sentence);
+        m_voices_list->SetItem(idx, 1, v.yell ? "Yes" : "No");
+    }
 
     // Update preview
     m_outfit_preview->SetBitmap(FormatsManager::render_look(m_current_doc.look, 2, 96));
@@ -334,6 +486,7 @@ void MainWindow::select_monster(const std::string& file) {
 void MainWindow::save_current_monster() {
     if (m_current_file.empty()) return;
 
+    // 1. Identity
     m_current_doc.name = m_name_ctrl->GetValue().ToStdString();
     m_current_doc.name_description = m_desc_ctrl->GetValue().ToStdString();
     m_current_doc.raceid = m_raceid_ctrl->GetValue();
@@ -341,18 +494,122 @@ void MainWindow::save_current_monster() {
     m_current_doc.health_now = m_health_ctrl->GetValue();
     m_current_doc.experience = m_exp_ctrl->GetValue();
     m_current_doc.speed = m_speed_ctrl->GetValue();
+    m_current_doc.manacost = m_manacost_ctrl->GetValue();
 
+    // 2. Look
     if (m_current_doc.look.mode == "typeex") {
         m_current_doc.look.typeex = m_look_type_ctrl->GetValue();
     } else {
         m_current_doc.look.type = m_look_type_ctrl->GetValue();
     }
+    m_current_doc.look.head = m_look_head_ctrl->GetValue();
+    m_current_doc.look.body = m_look_body_ctrl->GetValue();
+    m_current_doc.look.legs = m_look_legs_ctrl->GetValue();
+    m_current_doc.look.feet = m_look_feet_ctrl->GetValue();
+    m_current_doc.look.addons = m_look_addons_ctrl->GetValue();
     m_current_doc.look.corpse = m_look_corpse_ctrl->GetValue();
+
+    // 3. Combat
+    m_current_doc.flags["targetdistance"] = std::to_string(m_target_distance_ctrl->GetValue());
+    m_current_doc.flags["staticattack"] = std::to_string(m_static_attack_ctrl->GetValue());
+    m_current_doc.flags["runonhealth"] = std::to_string(m_run_on_health_ctrl->GetValue());
+
+    // 4. Resistances
+    m_current_doc.elements["physical"] = m_res_physical_ctrl->GetValue();
+    m_current_doc.elements["fire"] = m_res_fire_ctrl->GetValue();
+    m_current_doc.elements["earth"] = m_res_earth_ctrl->GetValue();
+    m_current_doc.elements["energy"] = m_res_energy_ctrl->GetValue();
+    m_current_doc.elements["ice"] = m_res_ice_ctrl->GetValue();
+    m_current_doc.elements["holy"] = m_res_holy_ctrl->GetValue();
+    m_current_doc.elements["death"] = m_res_death_ctrl->GetValue();
 
     if (Workspace::instance().save_monster(m_current_doc)) {
         wxMessageBox("Saved successfully!", "MONx", wxICON_INFORMATION | wxOK, this);
     } else {
         wxMessageBox("Failed to save monster file!", "Error", wxICON_ERROR | wxOK, this);
+    }
+}
+
+// Handlers for Add / Remove
+void MainWindow::on_add_loot(wxCommandEvent&) {
+    long id = wxGetNumberFromUser("Enter item ID to drop:", "Item ID:", "Add Loot", 2148, 1, 99999, this);
+    if (id > 0) {
+        LootItem li;
+        li.id = (uint32_t)id;
+        li.countmax = 1;
+        li.chance = 10000;
+        m_current_doc.loot.push_back(li);
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_remove_loot(wxCommandEvent&) {
+    long sel = m_loot_list->GetFirstSelected();
+    if (sel >= 0 && sel < (long)m_current_doc.loot.size()) {
+        m_current_doc.loot.erase(m_current_doc.loot.begin() + sel);
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_add_attack(wxCommandEvent&) {
+    wxString name = wxGetTextFromUser("Enter spell name (e.g. melee, fire, energy):", "Add Attack Spell", "melee", this);
+    if (!name.empty()) {
+        Spell sp;
+        sp.name = name.ToStdString();
+        sp.interval = 2000;
+        sp.chance = 100;
+        sp.min = -10;
+        sp.max = -50;
+        m_current_doc.attacks.push_back(sp);
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_add_defense(wxCommandEvent&) {
+    wxString name = wxGetTextFromUser("Enter defense spell name (e.g. healing, speed):", "Add Defense Spell", "healing", this);
+    if (!name.empty()) {
+        Spell sp;
+        sp.name = name.ToStdString();
+        sp.interval = 2000;
+        sp.chance = 20;
+        sp.min = 20;
+        sp.max = 50;
+        m_current_doc.defenses.push_back(sp);
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_remove_spell(wxCommandEvent&) {
+    long sel = m_spells_list->GetFirstSelected();
+    if (sel >= 0) {
+        if (sel < (long)m_current_doc.attacks.size()) {
+            m_current_doc.attacks.erase(m_current_doc.attacks.begin() + sel);
+        } else {
+            long dsel = sel - m_current_doc.attacks.size();
+            if (dsel < (long)m_current_doc.defenses.size()) {
+                m_current_doc.defenses.erase(m_current_doc.defenses.begin() + dsel);
+            }
+        }
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_add_voice(wxCommandEvent&) {
+    wxString sentence = wxGetTextFromUser("Enter monster voice sentence:", "Add Voice", "Rawr!", this);
+    if (!sentence.empty()) {
+        Voice v;
+        v.sentence = sentence.ToStdString();
+        v.yell = 0;
+        m_current_doc.voices.push_back(v);
+        select_monster(m_current_file);
+    }
+}
+
+void MainWindow::on_remove_voice(wxCommandEvent&) {
+    long sel = m_voices_list->GetFirstSelected();
+    if (sel >= 0 && sel < (long)m_current_doc.voices.size()) {
+        m_current_doc.voices.erase(m_current_doc.voices.begin() + sel);
+        select_monster(m_current_file);
     }
 }
 
@@ -401,7 +658,7 @@ void MainWindow::on_compare(wxCommandEvent&) {
 }
 
 void MainWindow::on_loot_sim(wxCommandEvent&) {
-    LootSimDialog dlg(this);
+    LootSimDialog dlg(this, m_current_doc.loot);
     dlg.ShowModal();
 }
 
@@ -420,11 +677,13 @@ void MainWindow::on_quick_open(wxCommandEvent&) {
 }
 
 void MainWindow::on_preferences(wxCommandEvent&) {
-    wxMessageBox("Preferences: configure tab visibility, linter rules, and default engine options.", "Preferences", wxOK | wxICON_INFORMATION, this);
+    PreferencesDialog dlg(this);
+    dlg.ShowModal();
 }
 
 void MainWindow::on_hotkeys(wxCommandEvent&) {
-    wxMessageBox("Hotkeys: keyboard shortcuts editor.", "Hotkeys", wxOK | wxICON_INFORMATION, this);
+    HotkeysDialog dlg(this);
+    dlg.ShowModal();
 }
 
 void MainWindow::on_about(wxCommandEvent&) {

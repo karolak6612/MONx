@@ -194,6 +194,118 @@ bool MonsterStorage::write_xml(const std::string& path, const MonsterDoc& doc, c
         look.attribute("corpse") ? look.attribute("corpse").set_value(doc.look.corpse) : look.append_attribute("corpse") = doc.look.corpse;
     }
 
+    // Flags
+    if (!doc.flags.empty()) {
+        pugi::xml_node flags = root.child("flags");
+        if (!flags) flags = root.append_child("flags");
+        flags.remove_children();
+        for (const auto& [k, v] : doc.flags) {
+            pugi::xml_node flag = flags.append_child("flag");
+            flag.append_attribute(k.c_str()) = v.c_str();
+        }
+    }
+
+    // Attacks
+    if (!doc.attacks.empty()) {
+        pugi::xml_node attacks = root.child("attacks");
+        if (!attacks) attacks = root.append_child("attacks");
+        attacks.remove_children();
+        for (const auto& atk : doc.attacks) {
+            pugi::xml_node node = attacks.append_child("attack");
+            node.append_attribute("name") = atk.name.c_str();
+            node.append_attribute("interval") = atk.interval;
+            node.append_attribute("chance") = atk.chance;
+            if (atk.min) node.append_attribute("min") = *atk.min;
+            if (atk.max) node.append_attribute("max") = *atk.max;
+            if (atk.range > 1) node.append_attribute("range") = atk.range;
+            if (atk.radius > 0) node.append_attribute("radius") = atk.radius;
+            if (atk.target > 0) node.append_attribute("target") = atk.target;
+        }
+    }
+
+    // Defenses
+    if (!doc.defenses.empty()) {
+        pugi::xml_node defenses = root.child("defenses");
+        if (!defenses) defenses = root.append_child("defenses");
+        defenses.remove_children();
+        for (const auto& def : doc.defenses) {
+            pugi::xml_node node = defenses.append_child("defense");
+            node.append_attribute("name") = def.name.c_str();
+            node.append_attribute("interval") = def.interval;
+            node.append_attribute("chance") = def.chance;
+            if (def.min) node.append_attribute("min") = *def.min;
+            if (def.max) node.append_attribute("max") = *def.max;
+        }
+    }
+
+    // Elements / Resistances
+    if (!doc.elements.empty()) {
+        pugi::xml_node elements = root.child("elements");
+        if (!elements) elements = root.append_child("elements");
+        elements.remove_children();
+        for (const auto& [elem, val] : doc.elements) {
+            if (val != 0) {
+                pugi::xml_node el = elements.append_child("element");
+                std::string attr = elem + "Percent";
+                el.append_attribute(attr.c_str()) = val;
+            }
+        }
+    }
+
+    // Immunities
+    if (!doc.immunities.empty()) {
+        pugi::xml_node immunities = root.child("immunities");
+        if (!immunities) immunities = root.append_child("immunities");
+        immunities.remove_children();
+        for (const auto& [imm, val] : doc.immunities) {
+            if (val) {
+                pugi::xml_node im = immunities.append_child("immunity");
+                im.append_attribute(imm.c_str()) = "1";
+            }
+        }
+    }
+
+    // Voices
+    if (!doc.voices.empty()) {
+        pugi::xml_node voices = root.child("voices");
+        if (!voices) voices = root.append_child("voices");
+        voices.remove_children();
+        for (const auto& v : doc.voices) {
+            pugi::xml_node node = voices.append_child("voice");
+            node.append_attribute("sentence") = v.sentence.c_str();
+            if (v.yell > 0) node.append_attribute("yell") = v.yell;
+        }
+    }
+
+    // Loot
+    if (!doc.loot.empty()) {
+        pugi::xml_node loot = root.child("loot");
+        if (!loot) loot = root.append_child("loot");
+        loot.remove_children();
+        for (const auto& li : doc.loot) {
+            pugi::xml_node node = loot.append_child("item");
+            node.append_attribute("id") = li.id;
+            if (li.countmax > 1) node.append_attribute("countmax") = li.countmax;
+            node.append_attribute("chance") = li.chance;
+            if (li.action_id > 0) node.append_attribute("actionId") = li.action_id;
+        }
+    }
+
+    // Summons
+    if (!doc.summons.empty()) {
+        pugi::xml_node summons = root.child("summons");
+        if (!summons) summons = root.append_child("summons");
+        summons.remove_children();
+        for (const auto& su : doc.summons) {
+            pugi::xml_node node = summons.append_child("summon");
+            node.append_attribute("name") = su.name.c_str();
+            node.append_attribute("interval") = su.interval;
+            node.append_attribute("chance") = su.chance;
+            node.append_attribute("max") = su.max;
+            if (su.force) node.append_attribute("force") = "1";
+        }
+    }
+
     return xml.save_file(path.c_str(), "\t", pugi::format_default | pugi::format_write_bom);
 }
 

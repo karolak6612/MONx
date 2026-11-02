@@ -41,12 +41,20 @@ private:
     void on_hotkeys(wxCommandEvent& evt);
     void on_about(wxCommandEvent& evt);
 
+    // List manipulation handlers
+    void on_add_loot(wxCommandEvent& evt);
+    void on_remove_loot(wxCommandEvent& evt);
+    void on_add_attack(wxCommandEvent& evt);
+    void on_add_defense(wxCommandEvent& evt);
+    void on_remove_spell(wxCommandEvent& evt);
+    void on_add_voice(wxCommandEvent& evt);
+    void on_remove_voice(wxCommandEvent& evt);
+
     wxAuiManager m_mgr;
 
     // UI elements
     wxSearchCtrl* m_search_ctrl = nullptr;
     wxListView* m_monster_list = nullptr;
-    wxImageList* m_image_list = nullptr;
 
     // Monster Editor Panes
     wxNotebook* m_editor_tabs = nullptr;
@@ -56,8 +64,37 @@ private:
     wxSpinCtrl* m_health_ctrl = nullptr;
     wxSpinCtrl* m_exp_ctrl = nullptr;
     wxSpinCtrl* m_speed_ctrl = nullptr;
+    wxSpinCtrl* m_manacost_ctrl = nullptr;
+
+    // Look controls
     wxSpinCtrl* m_look_type_ctrl = nullptr;
+    wxSpinCtrl* m_look_head_ctrl = nullptr;
+    wxSpinCtrl* m_look_body_ctrl = nullptr;
+    wxSpinCtrl* m_look_legs_ctrl = nullptr;
+    wxSpinCtrl* m_look_feet_ctrl = nullptr;
+    wxSpinCtrl* m_look_addons_ctrl = nullptr;
     wxSpinCtrl* m_look_corpse_ctrl = nullptr;
+
+    // Combat controls
+    wxSpinCtrl* m_armor_ctrl = nullptr;
+    wxSpinCtrl* m_defense_ctrl = nullptr;
+    wxSpinCtrl* m_target_distance_ctrl = nullptr;
+    wxSpinCtrl* m_static_attack_ctrl = nullptr;
+    wxSpinCtrl* m_run_on_health_ctrl = nullptr;
+
+    // Resistance controls
+    wxSpinCtrl* m_res_physical_ctrl = nullptr;
+    wxSpinCtrl* m_res_fire_ctrl = nullptr;
+    wxSpinCtrl* m_res_earth_ctrl = nullptr;
+    wxSpinCtrl* m_res_energy_ctrl = nullptr;
+    wxSpinCtrl* m_res_ice_ctrl = nullptr;
+    wxSpinCtrl* m_res_holy_ctrl = nullptr;
+    wxSpinCtrl* m_res_death_ctrl = nullptr;
+
+    // Lists in tabs
+    wxListView* m_loot_list = nullptr;
+    wxListView* m_spells_list = nullptr;
+    wxListView* m_voices_list = nullptr;
 
     // Preview Panel
     wxStaticBitmap* m_outfit_preview = nullptr;
